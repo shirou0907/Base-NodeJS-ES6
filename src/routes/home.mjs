@@ -1,8 +1,9 @@
 import express from 'express'
-var router = express.Router()
+import { checkAuth, checkAdminRole } from '../middleware/middleware.auth.mjs'
 
-/* GET home page. */
-router.get('/', function (req, res, next) {
+const router = express.Router()
+
+router.get('/', checkAuth, checkAdminRole, function (req, res, next) {
   res.json('cc')
 })
 
