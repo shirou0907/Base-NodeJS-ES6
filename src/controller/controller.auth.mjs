@@ -12,7 +12,7 @@ const createToken = (data, res) => {
     if (!err) {
       console.log('success', token)
       return res.json({
-        token: token,
+        token,
         message: 'Đăng nhập thành công',
       })
     }
