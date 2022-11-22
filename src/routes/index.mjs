@@ -1,6 +1,8 @@
 import indexRouter from './home.mjs'
-import usersRouter from './users.mjs'
+import cartRouter from './cart.mjs'
 import productRouter from './product.mjs'
+import usersRouter from './users.mjs'
+import orderRouter from './order.mjs'
 
 import { getErrorMessages } from '../helper/errror.mjs'
 
@@ -12,6 +14,10 @@ export const useRoute = app => {
   app.use('/users', usersRouter)
 
   app.use('/product', productRouter)
+
+  app.use('/cart', cartRouter)
+
+  app.use('/order', orderRouter)
 
   app.use((req, res, next) => {
     if (!req.route) return notFoundError(res)

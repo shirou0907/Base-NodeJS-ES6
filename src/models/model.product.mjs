@@ -15,7 +15,11 @@ const ProductModel = new Schema(
     description: String,
     tag: { type: [String], default: [] },
     attributes: { type: [Object], default: [] },
-    options: { type: [Object], default: [] },
+    options: {
+      colors: { type: [String], default: [] },
+      sizes: { type: [String], default: [] },
+    },
+    mainImage: { type: String, default: '' },
     images: { type: [String], default: [] },
     price: { type: Number, required: true },
     stock: { type: Number, required: true },

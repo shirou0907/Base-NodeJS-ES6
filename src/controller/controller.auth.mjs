@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken'
 import Customer from '../models/model.customer.mjs'
 import { roleAuth } from '../constants/index.mjs'
 import { getErrorMessages } from '../helper/errror.mjs'
-import cookieParser from 'cookie-parser'
 const secretKey = process.env.JWT_SECRET
 
 const { invalidError, serverError } = getErrorMessages()
@@ -32,6 +31,7 @@ export const login = async (req, res, next) => {
   try {
     if (uid) {
       const data = await getProfile(uid)
+
       if (!data) {
         try {
           const customer = await Customer.create({

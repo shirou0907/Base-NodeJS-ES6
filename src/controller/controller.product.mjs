@@ -112,9 +112,38 @@ export const updateProductBasicById = async (req, res, next) => {
   }
 }
 
+export const updateProductAttributeById = async (req, res, next) => {
+  const productId = req.params.id
+  const { attributes } = req.body
+  if (!attributes) {
+    return invalidError(res)
+  }
+  try {
+    const data = await Product.findByIdAndUpdate(productId, { attributes })
+    if (data) {
+      return res.json(data)
+    } else return notFoundError(res)
+  } catch (error) {
+    return serverError(res)
+  }
+}
+
+export const updateProductOptionById = async (req, res, next) => {
+  const productId = req.params.id
+  const { options } = req.body
+  if (!options) {
+    return invalidError(res)
+  }
+  try {
+    const data = await Product.findByIdAndUpdate(productId, { options })
+    if (data) {
+      return res.json(data)
+    } else return notFoundError(res)
+  } catch (error) {}
+}
+
 export const getComment = async (req, res, next) => {
   const productId = req.params.id
-
   try {
     const data = await Product.findOne({ _id: productId }).populate({
       path: 'comments',
