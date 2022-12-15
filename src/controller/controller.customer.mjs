@@ -5,9 +5,18 @@ import { getErrorMessages } from '../helper/errror.mjs'
 const { invalidError, serverError } = getErrorMessages()
 
 export const getAllCustomers = async (req, res) => {
+  let { page = 1, size = 2 } = req.query
+  page = parseInt(page)
+  size = parseInt(size)
   try {
-    const customers = await Customer.find({}).sort({ role: 'asc', createdAt: 'desc' })
-    return res.json(customers)
+    const customers = await Customer.find({})
+      .sort({ role: 'asc', createdAt: 'desc' })
+      .skip((page - 1) * size)
+      .limit(size)
+
+    const totalRecord = await Customer.find({}).estimatedDocumentCount()
+
+    return res.status(200).send({ status: true, message: 'success', data: customers, total: totalRecord })
   } catch (error) {
     return res.status(500).json(serverError)
   }
@@ -51,7 +60,7 @@ export const getShippingAddress = async (req, res) => {
     return invalidError(res)
   }
   try {
-    const data = await Shipment.find({ userId })
+    const data = await Shipment.find({ userId, active: true })
     if (data) {
       return res.json(data)
     }
@@ -67,7 +76,7 @@ export const deleteShippingAddress = async (req, res) => {
     return invalidError(res)
   }
   try {
-    const data = await Shipment.deleteOne({ _id: id })
+    const data = await Shipment.findByIdAndUpdate({ _id: id }, { active: false })
     if (data) {
       return res.json({
         data,

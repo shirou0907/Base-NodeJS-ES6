@@ -3,7 +3,12 @@ import Cart from '../models/model.cart.mjs'
 import Customer from '../models/model.customer.mjs'
 import Product from '../models/model.product.mjs'
 
-const totalAmount = products => {}
+export const countCart = async (req, res) => {
+  const userId = res.customer._id
+  const data = await Cart.findOne({ userId: userId })
+  if (!data) return res.status(200).send({ status: true, message: 'success', data: 0 })
+  return res.status(200).send({ status: true, message: 'success', data: data.products.length })
+}
 
 export const addItemToCart = async (req, res) => {
   let userId = res.customer._id
@@ -52,9 +57,9 @@ export const getCart = async (req, res) => {
 
   let cart = await Cart.findOne({ userId: userId }).populate({
     path: 'products',
-    populate: { path: 'productId', select: 'name price stock' },
+    populate: { path: 'productId', select: 'name price stock mainImage' },
   })
-  if (!cart) return res.status(404).send({ status: false, message: 'Cart not found for this user' })
+  if (!cart) return res.status(200).send({ status: true, message: 'success', data: null })
 
   let total = 0
   if (cart.products.length > 0) {
@@ -66,7 +71,7 @@ export const getCart = async (req, res) => {
   cart.total = total
   await cart.save()
 
-  res.status(200).send({ status: true, cart: cart })
+  return res.status(200).send({ status: true, message: 'success', data: cart })
 }
 
 export const decreaseQuantity = async (req, res) => {
@@ -107,16 +112,31 @@ export const removeItem = async (req, res) => {
   let cart = await Cart.findOne({ userId: userId })
   if (!cart) return res.status(404).send({ status: false, message: 'Cart not found for this user' })
 
+  let length = cart.products.length
+  if (length == 1) {
+    cart = await Cart.deleteOne({ _id: cart._id })
+    return res.status(200).send({ status: true, updatedCart: cart })
+  }
+
   let itemIndex = cart.products.findIndex(p => p.productId == productId)
   if (itemIndex > -1) {
     cart.products.splice(itemIndex, 1)
     cart = await cart.save()
+
     return res.status(200).send({ status: true, updatedCart: cart })
   }
   res.status(400).send({ status: false, message: 'Item does not exist in cart' })
 }
 
-export const reomveCart = async (req, res) => {
+export const removeCart = async (req, res) => {
   const cartId = req.params.id
-  const data = await Cart.deleteOne({ _id})
+
+  if (!cartId || !isValidObjectId(cartId)) return res.status(400).send({ status: false, message: 'Invalid cart ID' })
+
+  const data = await Cart.deleteOne({ _id: cartId })
+
+  if (data.deletedCount === 0) {
+    return res.status(404).send({ status: false, message: 'Cart not found' })
+  }
+  res.status(200).send({ status: true, message: 'Cart deleted successfully' })
 }

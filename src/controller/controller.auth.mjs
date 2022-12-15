@@ -4,7 +4,7 @@ import { roleAuth } from '../constants/index.mjs'
 import { getErrorMessages } from '../helper/errror.mjs'
 const secretKey = process.env.JWT_SECRET
 
-const { invalidError, serverError } = getErrorMessages()
+const { invalidError, accessDeniedError, serverError } = getErrorMessages()
 
 const createToken = (data, res) => {
   jwt.sign({ _id: data._id.toString() }, secretKey, (err, token) => {
@@ -21,6 +21,16 @@ const createToken = (data, res) => {
 export const getProfile = async uid => {
   const customer = await Customer.findOne({ uid })
   return customer
+}
+
+export const getProfileLogin = async (req, res) => {
+  const userId = res.customer._id
+  if (userId) {
+    const customer = await Customer.findOne({ _id: userId })
+    res.json(customer)
+  } else {
+    return invalidError(res)
+  }
 }
 
 export const login = async (req, res, next) => {
@@ -57,5 +67,21 @@ export const login = async (req, res, next) => {
     }
   } catch (error) {
     return serverError(res)
+  }
+}
+
+export const loginAdmin = async (req, res, next) => {
+  const { uid, email, emailVerified, displayName, isAnonymous, photoURL } = req.body
+  if (uid) {
+    const data = await getProfile(uid)
+    if (data) {
+      if (data.role === roleAuth.ADMIN) {
+        return createToken(data, res)
+      } else {
+        return accessDeniedError(res)
+      }
+    } else {
+      return accessDeniedError(res)
+    }
   }
 }

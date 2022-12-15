@@ -13,6 +13,7 @@ const ShipmentSchema = new Schema(
     paymentMethod: { type: String, default: 'COD' },
     carrieName: { type: String, default: 'T-Express' },
     expectedDelivery: { type: Date, default: () => new Date(+new Date() + 3 * 24 * 60 * 60 * 1000) },
+    active: { type: Boolean, default: true },
   },
   {
     timestamps: true,

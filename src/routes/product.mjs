@@ -8,7 +8,11 @@ import {
   updateProductBasicById,
   updateProductAttributeById,
   updateProductOptionById,
+  disableProductById,
+  enableProductById,
   getComment,
+  getAllProductHome,
+  searchProductByName,
 } from '../controller/controller.product.mjs'
 
 import { uploadMultiProduct, uploadSingleProduct } from '../controller/controller.upload.mjs'
@@ -16,14 +20,21 @@ import upload from '../middleware/upload.mjs'
 
 const router = express.Router()
 
+router.get('/home', getAllProductHome)
+
 //Product
 router.get('/', getAllProduct)
 router.post('/', createProduct)
 
+router.get('/search', searchProductByName)
+
 router.get('/:id', getProductById)
-router.put('/:id', updateProductBasicById)
-router.put('/:id/attribute', updateProductAttributeById)
-router.put('/:id/option', updateProductOptionById)
+router.put('/:id', checkAuth, checkAdminRole, updateProductBasicById)
+router.put('/:id/attribute', checkAuth, checkAdminRole, updateProductAttributeById)
+router.put('/:id/option', checkAuth, checkAdminRole, updateProductOptionById)
+
+router.put('/:id/enabled', checkAuth, checkAdminRole, enableProductById)
+router.put('/:id/disabled', checkAuth, checkAdminRole, disableProductById)
 
 //Images
 router.post('/:id/image', upload.single('image'), uploadSingleProduct)
