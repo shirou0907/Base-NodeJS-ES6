@@ -12,7 +12,8 @@ export const countOrders = async (req, res, next) => {
     const wait = await Order.countDocuments({ status: 0 })
     const process = await Order.countDocuments({ status: 1 })
     const cancel = await Order.countDocuments({ status: 2 })
-    return res.status(200).send({ status: true, message: 'success', data: { all, wait, process, cancel } })
+    const complete = await Order.countDocuments({ status: 3 })
+    return res.status(200).send({ status: true, message: 'success', data: { all, wait, process, cancel, complete } })
   } catch (error) {
     return serverError(res)
   }
@@ -99,7 +100,9 @@ export const cancelOrder = async (req, res) => {
 
 export const getOrderCustomer = async (req, res) => {
   const userId = res.customer._id
-
+  let { page = 1, size = 2, orderBy = 'updatedAt', sort = 'desc' } = req.query
+  page = parseInt(page)
+  size = parseInt(size)
   try {
     const data = await Order.find({ userId })
       .populate('shipment')
@@ -107,8 +110,12 @@ export const getOrderCustomer = async (req, res) => {
         path: 'orderDetail',
         populate: { path: 'productId', select: 'name price mainImage' },
       })
+      .skip((page - 1) * size)
+      .limit(size)
+      .sort({ [orderBy]: sort })
+    const totalRecord = await Order.find({ userId })
     if (!data) return res.status(404).send({ status: false, message: 'Order not found' })
-    return res.status(200).send({ status: true, data })
+    return res.status(200).send({ status: true, data, total: totalRecord.length })
   } catch (error) {
     return serverError(res)
   }

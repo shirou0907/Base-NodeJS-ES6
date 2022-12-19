@@ -257,7 +257,7 @@ export const getComment = async (req, res, next) => {
       .select('comments')
 
     if (data) {
-      return res.status(200).send({ status: true, message: 'success', data: data.comments })
+      return res.status(200).send({ status: true, message: 'success', data: data.comments.reverse() })
     }
   } catch (error) {
     return serverError(res)
