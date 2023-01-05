@@ -130,8 +130,10 @@ export const addOrderCustomer = async (req, res) => {
     for (let product of orderDetail) {
       const quantity = await Product.findById(product.productId)
       if (quantity.stock < product.quantity) {
-        console.log(quantity.stock)
-        return res.status(400).send({ status: false, message: 'Quantity not enough' })
+        return res.status(400).send({
+          status: false,
+          message: `Sản phẩm ${quantity.name} hiện chỉ còn lại ${quantity.stock} sản phẩm, bạn vui lòng cập nhật lại giỏ hàng nhé!`,
+        })
       }
     }
 
