@@ -127,13 +127,6 @@ export const addOrderCustomer = async (req, res) => {
 
   if (!orderDetail || !shipment || !total) return invalidError(res)
   try {
-    const data = await Order.create({
-      userId,
-      orderDetail,
-      shipment,
-      total,
-      note,
-    })
     for (let product of orderDetail) {
       const quantity = await Product.findById(product.productId)
       if (quantity.stock < product.quantity) {
@@ -145,6 +138,14 @@ export const addOrderCustomer = async (req, res) => {
     for (let product of orderDetail) {
       await Product.findByIdAndUpdate(product.productId, { $inc: { stock: -product.quantity } })
     }
+
+    const data = await Order.create({
+      userId,
+      orderDetail,
+      shipment,
+      total,
+      note,
+    })
 
     if (!data) return res.status(400).send({ status: false, message: 'Order not created' })
     return res.status(200).send({ status: true, message: 'Order created' })
